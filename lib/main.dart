@@ -8,11 +8,11 @@ import 'pages/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await _setDesktopAppSize();
+  await _setDesktopAppSettings();
   runApp(const MyApp());
 }
 
-Future<void> _setDesktopAppSize() async {
+Future<void> _setDesktopAppSettings() async {
   if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS) {
     const size = Size(400, 550);
     await windowManager.ensureInitialized();
