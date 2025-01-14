@@ -34,7 +34,7 @@ class FileEncryptionService {
       final encrypter = Encrypter(AES(aesKey, mode: AESMode.cbc));
       final encrypted = encrypter.encryptBytes(fileBytes, iv: iv);
 
-      final encryptedFilePath = await FilePickerService.selectDirectoryFrom(
+      final encryptedFilePath = await FilePickerService.selectDirectoryToSave(
         file.parent.path,
         file.name + kEncryptedFileExtension,
       );
@@ -60,7 +60,7 @@ class FileEncryptionService {
       final decrypted =
           encrypter.decryptBytes(Encrypted(encryptedData), iv: iv);
 
-      final originalFilePath = await FilePickerService.selectDirectoryFrom(
+      final originalFilePath = await FilePickerService.selectDirectoryToSave(
         file.parent.path,
         file.name.replaceAll(kEncryptedFileExtension, ''),
       );

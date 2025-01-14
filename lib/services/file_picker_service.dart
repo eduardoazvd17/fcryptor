@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:fcryptor/utils/constants.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_selector/file_selector.dart';
 
@@ -18,7 +17,7 @@ class FilePickerService {
     }
   }
 
-  static Future<String?> selectDirectoryFrom(
+  static Future<String?> selectDirectoryToSave(
     String initialDirectory,
     String suggestedName,
   ) async {
