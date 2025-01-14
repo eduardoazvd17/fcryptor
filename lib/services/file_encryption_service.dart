@@ -7,6 +7,8 @@ import 'package:path/path.dart' as path;
 const _kDefaultPaddingChar = 'x';
 
 class FileEncryptionService {
+  FileEncryptionService._();
+
   static String _normalizeKey(String key, String paddingChar) {
     if (key.length > 32) {
       return key.substring(0, 32);
