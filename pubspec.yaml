@@ -38,7 +38,6 @@ dependencies:
   window_manager: ^0.4.3
   encrypt: ^5.0.3
   url_launcher: ^6.3.1
-  file_selector: ^1.0.3
 
 dev_dependencies:
   flutter_test:

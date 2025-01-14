@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart';
 import 'package:fcryptor/services/file_picker_service.dart';
 import 'package:fcryptor/utils/constants.dart';
@@ -34,12 +35,12 @@ class FileEncryptionService {
       final encrypter = Encrypter(AES(aesKey, mode: AESMode.cbc));
       final encrypted = encrypter.encryptBytes(fileBytes, iv: iv);
 
-      final encryptedFilePath = await FilePickerService.selectDirectoryToSave(
-        file.parent.path,
-        file.name + kEncryptedFileExtension,
+      final encryptedFilePath = await FilePickerService.saveFile(
+        fileName: file.name + kEncryptedFileExtension,
+        bytes: Uint8List.fromList(iv.bytes + encrypted.bytes),
+        initialDirectory: file.parent.path,
       );
-      return await File(encryptedFilePath!)
-          .writeAsBytes(iv.bytes + encrypted.bytes);
+      return File(encryptedFilePath!);
     } catch (_) {
       return null;
     }
@@ -57,14 +58,17 @@ class FileEncryptionService {
       final encryptedData = fileBytes.sublist(16);
       final aesKey = Key.fromUtf8(normalizedKey);
       final encrypter = Encrypter(AES(aesKey, mode: AESMode.cbc));
-      final decrypted =
-          encrypter.decryptBytes(Encrypted(encryptedData), iv: iv);
-
-      final originalFilePath = await FilePickerService.selectDirectoryToSave(
-        file.parent.path,
-        file.name.replaceAll(kEncryptedFileExtension, ''),
+      final decrypted = encrypter.decryptBytes(
+        Encrypted(encryptedData),
+        iv: iv,
       );
-      return await File(originalFilePath!).writeAsBytes(decrypted);
+
+      final originalFilePath = await FilePickerService.saveFile(
+        fileName: file.name.replaceAll(kEncryptedFileExtension, ''),
+        bytes: Uint8List.fromList(decrypted),
+        initialDirectory: file.parent.path,
+      );
+      return File(originalFilePath!);
     } catch (_) {
       return null;
     }
