@@ -14,7 +14,7 @@ void main() async {
 
 Future<void> _setDesktopAppSettings() async {
   if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS) {
-    const size = Size(400, 550);
+    const size = Size(400, 640);
     await windowManager.ensureInitialized();
     WindowManager.instance.setTitle('FCryptor');
     WindowManager.instance.setSize(size);
@@ -29,9 +29,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      color: Colors.grey.shade900,
+      debugShowCheckedModeBanner: false,
       title: 'FCryptor',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.orange,
+          brightness: Brightness.dark,
+          primary: Colors.orange,
+          background: Colors.grey.shade900,
+        ),
+        scaffoldBackgroundColor: Colors.grey.shade900,
+        primaryColor: Colors.orange,
         useMaterial3: true,
       ),
       home: const HomePage(),

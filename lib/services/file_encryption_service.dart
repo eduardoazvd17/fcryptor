@@ -9,16 +9,19 @@ const _kDefaultPaddingChar = 'x';
 class FileEncryptionService {
   FileEncryptionService._();
 
-  static String _normalizeKey(String key, String paddingChar) {
-    if (key.length > 32) {
-      return key.substring(0, 32);
-    } else if (key.length < 32) {
-      return key.padRight(32, paddingChar);
+  static Future<String?> start(
+    File file,
+    String key, {
+    String paddingChar = _kDefaultPaddingChar,
+  }) async {
+    if (file.path.endsWith('.fcrypto')) {
+      return await _decrypt(file, key, paddingChar: paddingChar);
+    } else {
+      return await _encrypt(file, key, paddingChar: paddingChar);
     }
-    return key;
   }
 
-  static Future<String?> encrypt(
+  static Future<String?> _encrypt(
     File file,
     String key, {
     String paddingChar = _kDefaultPaddingChar,
@@ -38,7 +41,7 @@ class FileEncryptionService {
     }
   }
 
-  static Future<String?> decrypt(
+  static Future<String?> _decrypt(
     File file,
     String key, {
     String paddingChar = _kDefaultPaddingChar,
@@ -58,5 +61,14 @@ class FileEncryptionService {
     } catch (_) {
       return null;
     }
+  }
+
+  static String _normalizeKey(String key, String paddingChar) {
+    if (key.length > 32) {
+      return key.substring(0, 32);
+    } else if (key.length < 32) {
+      return key.padRight(32, paddingChar);
+    }
+    return key;
   }
 }
