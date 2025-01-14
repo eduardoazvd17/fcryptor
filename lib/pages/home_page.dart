@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:fcryptor/services/file_encryption_service.dart';
 import 'package:fcryptor/services/file_picker_service.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -41,7 +43,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<void> _openMyWebsite() async {}
+  Future<void> _openMyWebsite() async {
+    final uri = Uri.parse('https://eduardoazevedo.com');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
 
   Future<void> _start() async {
     setState(() {
