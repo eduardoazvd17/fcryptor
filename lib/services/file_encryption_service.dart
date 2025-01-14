@@ -1,8 +1,5 @@
-// ignore_for_file: depend_on_referenced_packages
-
 import 'dart:io';
 import 'package:encrypt/encrypt.dart';
-import 'package:path/path.dart' as path;
 
 const _kDefaultPaddingChar = 'x';
 
@@ -33,7 +30,7 @@ class FileEncryptionService {
       final iv = IV.fromLength(16);
       final encrypter = Encrypter(AES(aesKey, mode: AESMode.cbc));
       final encrypted = encrypter.encryptBytes(fileBytes, iv: iv);
-      final encryptedFilePath = path.setExtension(file.path, '.fcrypto');
+      final encryptedFilePath = '${file.path}.fcryptor';
       await File(encryptedFilePath).writeAsBytes(iv.bytes + encrypted.bytes);
       return encryptedFilePath;
     } catch (_) {
@@ -55,7 +52,7 @@ class FileEncryptionService {
       final encrypter = Encrypter(AES(aesKey, mode: AESMode.cbc));
       final decrypted =
           encrypter.decryptBytes(Encrypted(encryptedData), iv: iv);
-      final originalFilePath = path.withoutExtension(file.path);
+      final originalFilePath = file.path.replaceAll('.fcryptor', '');
       await File(originalFilePath).writeAsBytes(decrypted);
       return originalFilePath;
     } catch (_) {

@@ -73,168 +73,183 @@ class _HomePageState extends State<HomePage> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Center(
-                child: Column(
-                  children: [
-                    Text(
-                      'FCryptor',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'A open source file encryption tool',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: InkWell(
-                                onTap: _isLoading ? null : _selectFile,
-                                borderRadius: BorderRadius.circular(8),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      Icon(
-                                        Icons.file_upload_outlined,
-                                        color: _isLoading
-                                            ? Colors.grey
-                                            : Theme.of(context).primaryColor,
-                                        size: 120,
-                                      ),
-                                      Text(
-                                        _selectedFile?.path.split('/').last ??
-                                            'No file selected',
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 10),
-                                        child: Text(
-                                          _selectedFile == null
-                                              ? 'Choose file'
-                                              : 'Change file',
+        resizeToAvoidBottomInset: false,
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        Text(
+                          'FCryptor',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'A open source file encryption tool',
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: InkWell(
+                                  onTap: _isLoading ? null : _selectFile,
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Icon(
+                                          Icons.file_upload_outlined,
+                                          color: _isLoading
+                                              ? Colors.grey
+                                              : Theme.of(context).primaryColor,
+                                          size: 120,
+                                        ),
+                                        Text(
+                                          _selectedFile?.path.split('/').last ??
+                                              'No file selected',
                                           textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: _isLoading
-                                                ? Colors.grey
-                                                : Theme.of(context)
-                                                    .primaryColor,
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 10),
+                                          child: Text(
+                                            _selectedFile == null
+                                                ? 'Choose file'
+                                                : 'Change file',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: _isLoading
+                                                  ? Colors.grey
+                                                  : Theme.of(context)
+                                                      .primaryColor,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Password'),
-                                const Text(
-                                  'Set your password to encrypt or decrypt files',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 10),
-                                  child: TextField(
-                                    maxLength: 32,
-                                    enabled: !_isLoading,
-                                    controller: _keyController,
-                                    obscureText: true,
-                                    obscuringCharacter: '•',
-                                    textAlign: TextAlign.center,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
+                                      ],
                                     ),
-                                    onChanged: _isLoading
-                                        ? null
-                                        : (_) {
-                                            setState(() => _result = null);
-                                          },
                                   ),
                                 ),
-                              ],
-                            ),
-                            TextButton.icon(
-                              onPressed: _isLoading || _selectedFile == null
-                                  ? null
-                                  : _start,
-                              icon: Icon(
-                                _selectedFile?.path.endsWith('.fcrypto') == true
-                                    ? Icons.lock_open_outlined
-                                    : Icons.lock,
                               ),
-                              label: Text(
-                                _selectedFile?.path.endsWith('.fcrypto') == true
-                                    ? 'Decrypt file'
-                                    : 'Encrypt file',
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Password'),
+                                  const Text(
+                                    'Set your password to encrypt or decrypt files',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: TextField(
+                                      maxLength: 32,
+                                      enabled: !_isLoading,
+                                      controller: _keyController,
+                                      obscureText: true,
+                                      obscuringCharacter: '•',
+                                      textAlign: TextAlign.center,
+                                      decoration: const InputDecoration(
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      onChanged: _isLoading
+                                          ? null
+                                          : (_) {
+                                              setState(() => _result = null);
+                                            },
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 25, bottom: 5),
-                              child: LinearProgressIndicator(
-                                value: _isLoading ? null : 0,
+                              TextButton.icon(
+                                onPressed: _isLoading || _selectedFile == null
+                                    ? null
+                                    : _start,
+                                icon: Icon(
+                                  _selectedFile?.path.endsWith('.fcryptor') ==
+                                          true
+                                      ? Icons.lock_open_outlined
+                                      : Icons.lock,
+                                ),
+                                label: Text(
+                                  _selectedFile?.path.endsWith('.fcryptor') ==
+                                          true
+                                      ? 'Decrypt file'
+                                      : 'Encrypt file',
+                                ),
                               ),
-                            ),
-                            Text(
-                              _isLoading
-                                  ? 'Loading...'
-                                  : _result ?? 'Waiting...',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.grey),
-                            )
-                          ],
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 25, bottom: 5),
+                                child: LinearProgressIndicator(
+                                  value: _isLoading ? null : 0,
+                                ),
+                              ),
+                              Text(
+                                _isLoading
+                                    ? 'Loading...'
+                                    : _result ?? 'Waiting...',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.grey),
+                              )
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: _openMyWebsite,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            'Made with Flutter by Eduardo Azevedo',
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            'eduardoazevedo.com',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              decoration: TextDecoration.underline,
-                              color: Theme.of(context).colorScheme.primary,
-                              decorationColor:
-                                  Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
+            const Divider(height: 0),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: _openMyWebsite,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'Made with Flutter by Eduardo Azevedo',
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        'eduardoazevedo.com',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          decoration: TextDecoration.underline,
+                          color: Theme.of(context).colorScheme.primary,
+                          decorationColor:
+                              Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
