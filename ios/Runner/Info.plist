@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string></string>
+	<key>NSFileUsageDescription</key>
+	<string></string>
 </dict>
 </plist>

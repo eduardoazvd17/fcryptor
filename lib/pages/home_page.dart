@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:fcryptor/services/file_encryption_service.dart';
 import 'package:fcryptor/services/file_picker_service.dart';
+import 'package:fcryptor/utils/constants.dart';
+import 'package:fcryptor/utils/file_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -66,7 +68,7 @@ class _HomePageState extends State<HomePage> {
     );
     setState(() {
       _result = result != null
-          ? 'Success! File saved as: ${result.split('/').last}'
+          ? 'Success! File saved as: ${result.name}'
           : 'An error occurred in the process, please try again.';
       _isLoading = false;
     });
@@ -213,12 +215,12 @@ class _HomePageState extends State<HomePage> {
     return TextButton.icon(
       onPressed: _isStartButtonEnabled ? _start : null,
       icon: Icon(
-        _selectedFile?.path.endsWith('.fcryptor') == true
+        _selectedFile?.path.endsWith(kEncryptedFileExtension) == true
             ? Icons.lock_open_outlined
             : Icons.lock,
       ),
       label: Text(
-        _selectedFile?.path.endsWith('.fcryptor') == true
+        _selectedFile?.path.endsWith(kEncryptedFileExtension) == true
             ? 'Decrypt file'
             : 'Encrypt file',
       ),
