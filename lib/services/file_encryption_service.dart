@@ -47,10 +47,11 @@ class FileEncryptionService {
 
       return saveResult.fold(
         onSuccess: (success) async {
-          final result = await File(success).writeAsBytes(
-            iv.bytes + encrypted.bytes,
-          );
-          return Success(result);
+          final file = File(success);
+          if (!file.existsSync()) {
+            await file.writeAsBytes(iv.bytes + encrypted.bytes);
+          }
+          return Success(file);
         },
         onError: (error) => Error(error),
       );
@@ -84,8 +85,11 @@ class FileEncryptionService {
 
       return saveResult.fold(
         onSuccess: (success) async {
-          final result = await File(success).writeAsBytes(decrypted);
-          return Success(result);
+          final file = File(success);
+          if (!file.existsSync()) {
+            await file.writeAsBytes(decrypted);
+          }
+          return Success(file);
         },
         onError: (error) => Error(error),
       );
