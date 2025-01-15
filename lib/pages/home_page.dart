@@ -90,12 +90,17 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (_file == null)
-                    _buildFileSelectorStep()
-                  else if (_resultFile == null)
-                    _buildPasswordStep()
-                  else
-                    _buildResultStep(),
+                  AnimatedSwitcher(
+                    switchInCurve: Curves.ease,
+                    switchOutCurve: Curves.ease,
+                    duration: const Duration(seconds: 1),
+                    reverseDuration: const Duration(seconds: 1),
+                    child: _file == null
+                        ? _buildFileSelectorStep()
+                        : _resultFile == null
+                            ? _buildPasswordStep()
+                            : _buildResultStep(),
+                  ),
                 ],
               ),
             ),
@@ -246,14 +251,40 @@ class _HomePageState extends State<HomePage> {
                   : 'An error occurred on ${_isDecrypting ? 'decrypting' : 'encrypting'} file process, please try again.',
             ),
             if (_resultFile != null) ...[
-              const SizedBox(height: 20),
-              Text(
-                _resultFile!.shortName,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium,
+              const SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    spacing: 10,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.file_present_outlined),
+                      Flexible(
+                        child: Text(
+                          _resultFile!.shortName,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             TextButton.icon(
               onPressed: _reset,
               icon: Icon(Icons.refresh),
