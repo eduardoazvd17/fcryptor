@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   String? _password;
   bool _isLoading = false;
   File? _resultFile;
+  String? _errorMessage;
 
   bool get _isDecrypting =>
       _file?.name.endsWith(kEncryptedFileExtension) == true;
@@ -57,6 +58,7 @@ class _HomePageState extends State<HomePage> {
       _password = null;
       _isLoading = false;
       _resultFile = null;
+      _errorMessage = null;
     });
   }
 
@@ -97,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                     reverseDuration: const Duration(seconds: 1),
                     child: _file == null
                         ? _buildFileSelectorStep()
-                        : _resultFile == null
+                        : (_resultFile == null && _errorMessage == null)
                             ? _buildPasswordStep()
                             : _buildResultStep(),
                   ),
@@ -161,28 +163,64 @@ class _HomePageState extends State<HomePage> {
           child: ContentContainerWidget(
             child: Column(
               children: [
-                Row(
-                  spacing: 20,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    RoundedIconWidget(
-                      icon: _isDecrypting
-                          ? Icons.lock_open_outlined
-                          : Icons.lock_outline,
-                      color: _isLoading
-                          ? Colors.grey
-                          : Theme.of(context).primaryColor,
+                RoundedIconWidget(
+                  icon: _isDecrypting
+                      ? Icons.lock_open_outlined
+                      : Icons.lock_outline,
+                  color:
+                      _isLoading ? Colors.grey : Theme.of(context).primaryColor,
+                ),
+                const SizedBox(height: 20),
+                InkWell(
+                  onTap: _isLoading ? null : _reset,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    Flexible(
-                      child: Text(
-                        _file!.shortName,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleMedium,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        spacing: 5,
+                        children: [
+                          Row(
+                            spacing: 10,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.file_present_outlined),
+                              Flexible(
+                                child: Text(
+                                  _file!.shortName,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary,
+                                      ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            'Change file',
+                            style: TextStyle(
+                              color: _isLoading
+                                  ? Colors.grey
+                                  : Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 25),
                 TextField(
                   controller: _passwordController,
                   maxLength: 32,
@@ -203,29 +241,23 @@ class _HomePageState extends State<HomePage> {
                     _password = value.length < 6 ? null : value;
                   }),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton.icon(
-                      onPressed: _isLoading ? null : _reset,
-                      icon: Icon(Icons.keyboard_arrow_left),
-                      label: Text('Change file'),
-                    ),
-                    TextButton.icon(
-                      onPressed:
-                          (_isLoading || _password == null) ? null : _start,
-                      icon: Icon(
-                        _isDecrypting
-                            ? Icons.lock_open_outlined
-                            : Icons.lock_outline,
-                      ),
-                      label: Text(
-                        _isDecrypting ? 'Decrypt' : 'Encrypt',
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed:
+                            (_isLoading || _password == null) ? null : _start,
+                        icon: Icon(
+                          _isDecrypting
+                              ? Icons.lock_open_outlined
+                              : Icons.lock_outline,
+                        ),
+                        label: Text(_isDecrypting ? 'Decrypt' : 'Encrypt'),
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -250,6 +282,16 @@ class _HomePageState extends State<HomePage> {
                   ? 'Successfully ${_isDecrypting ? 'decrypted' : 'encrypted'} file.'
                   : 'An error occurred on ${_isDecrypting ? 'decrypting' : 'encrypting'} file process, please try again.',
             ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.red,
+                    ),
+              ),
+            ],
             if (_resultFile != null) ...[
               const SizedBox(height: 10),
               Container(
@@ -284,11 +326,17 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ],
-            const SizedBox(height: 10),
-            TextButton.icon(
-              onPressed: _reset,
-              icon: Icon(Icons.refresh),
-              label: Text('Select another file'),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: _reset,
+                    icon: Icon(Icons.refresh),
+                    label: Text('Select another file'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
