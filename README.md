@@ -1,16 +1,19 @@
-# fcryptor
+# FCryptor
 
-A new Flutter project.
+FCryptor is a cross-platform file encryption application built with Flutter. It provides a secure way to encrypt and decrypt files across different platforms, including web and desktop environments.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- File encryption and decryption
+- Cross-platform support (Mobile, Web, Desktop)
+- Secure password-based encryption (AES-256)
+- Simple and intuitive user interface
+- Native file picker integration
 
-A few resources to get you started if this is your first Flutter project:
+## Screenshots
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<p align="center">
+  <img src="screenshots/select_file_step.png" width="300">
+  <img src="screenshots/password_step.png" width="300">
+  <img src="screenshots/result_step.png" width="300">
+</p>
