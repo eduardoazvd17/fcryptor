@@ -38,7 +38,8 @@ class FileEncryptionService {
         bytes: Uint8List.fromList(iv.bytes + encrypted.bytes),
         initialDirectory: file.parent.path,
       );
-      return File(encryptedFilePath!);
+      return await File(encryptedFilePath!)
+          .writeAsBytes(iv.bytes + encrypted.bytes);
     } catch (_) {
       return null;
     }
@@ -66,7 +67,7 @@ class FileEncryptionService {
         bytes: Uint8List.fromList(decrypted),
         initialDirectory: file.parent.path,
       );
-      return File(originalFilePath!);
+      return File(originalFilePath!).writeAsBytes(decrypted);
     } catch (_) {
       return null;
     }

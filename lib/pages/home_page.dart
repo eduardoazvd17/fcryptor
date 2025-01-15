@@ -1,8 +1,15 @@
 import 'dart:io';
 
+import 'package:fcryptor/services/file_encryption_service.dart';
+import 'package:fcryptor/utils/constants.dart';
+import 'package:fcryptor/utils/file_extension.dart';
 import 'package:fcryptor/widgets/footer_widget.dart';
 import 'package:fcryptor/widgets/header_widget.dart';
+import 'package:fcryptor/widgets/rounded_icon_widget.dart';
 import 'package:flutter/material.dart';
+
+import '../services/file_picker_service.dart';
+import '../widgets/content_container_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,6 +24,10 @@ class _HomePageState extends State<HomePage> {
   File? _file;
   String? _password;
   bool _isLoading = false;
+  File? _resultFile;
+
+  bool get _isDecrypting =>
+      _file?.name.endsWith(kEncryptedFileExtension) == true;
 
   @override
   void initState() {
@@ -28,6 +39,34 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectFile() async {
+    setState(() => _isLoading = true);
+    final file = await FilePickerService.pickFile();
+    setState(() {
+      if (file != null) _file = file;
+      _isLoading = false;
+    });
+  }
+
+  void _reset() {
+    _passwordController.clear();
+    setState(() {
+      _file = null;
+      _password = null;
+      _isLoading = false;
+      _resultFile = null;
+    });
+  }
+
+  Future<void> _start() async {
+    setState(() => _isLoading = true);
+    final result = await FileEncryptionService.start(_file!, _password!);
+    setState(() {
+      _resultFile = result;
+      _isLoading = false;
+    });
   }
 
   @override
@@ -50,10 +89,172 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [],
+                children: [
+                  if (_file == null)
+                    _buildFileSelectorStep()
+                  else if (_resultFile == null)
+                    _buildPasswordStep()
+                  else
+                    _buildResultStep(),
+                ],
               ),
             ),
             FooterWidget(isLoading: _isLoading),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFileSelectorStep() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30),
+      child: InkWell(
+        onTap: _isLoading ? null : _selectFile,
+        borderRadius: BorderRadius.circular(16),
+        child: ContentContainerWidget(
+          child: Column(
+            children: [
+              RoundedIconWidget(
+                icon: Icons.upload_file_outlined,
+                color:
+                    _isLoading ? Colors.grey : Theme.of(context).primaryColor,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Select a file',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: _isLoading
+                          ? Colors.grey
+                          : Theme.of(context).primaryColor,
+                    ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                'Select a file to encrypt or decrypt',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: _isLoading
+                          ? Colors.grey
+                          : Theme.of(context).colorScheme.secondary,
+                    ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordStep() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          child: ContentContainerWidget(
+            child: Column(
+              children: [
+                Row(
+                  spacing: 20,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    RoundedIconWidget(
+                      icon: _isDecrypting
+                          ? Icons.lock_open_outlined
+                          : Icons.lock_outline,
+                      color: _isLoading
+                          ? Colors.grey
+                          : Theme.of(context).primaryColor,
+                    ),
+                    Flexible(
+                      child: Text(
+                        _file!.shortName,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                TextField(
+                  controller: _passwordController,
+                  maxLength: 32,
+                  textAlign: TextAlign.center,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    labelText: ' Encryption password ',
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    floatingLabelAlignment: FloatingLabelAlignment.center,
+                  ),
+                  onChanged: (value) => setState(() {
+                    _password = value.isEmpty ? null : value;
+                  }),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton.icon(
+                      onPressed: _isLoading ? null : _reset,
+                      icon: Icon(Icons.keyboard_arrow_left),
+                      label: Text('Change file'),
+                    ),
+                    TextButton.icon(
+                      onPressed:
+                          (_isLoading || _password == null) ? null : _start,
+                      icon: Icon(
+                        _isDecrypting
+                            ? Icons.lock_open_outlined
+                            : Icons.lock_outline,
+                      ),
+                      label: Text(
+                        _isDecrypting ? 'Decrypt' : 'Encrypt',
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResultStep() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30),
+      child: ContentContainerWidget(
+        child: Column(
+          children: [
+            RoundedIconWidget(
+              icon: _resultFile != null ? Icons.check : Icons.error,
+              color: _resultFile != null ? Colors.green : Colors.red,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              _resultFile != null
+                  ? 'Successfully ${_isDecrypting ? 'decrypted' : 'encrypted'} file.'
+                  : 'An error occurred on ${_isDecrypting ? 'decrypting' : 'encrypting'} file process, please try again.',
+            ),
+            if (_resultFile != null) ...[
+              const SizedBox(height: 20),
+              Text(
+                _resultFile!.shortName,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
+            const SizedBox(height: 20),
+            TextButton.icon(
+              onPressed: _reset,
+              icon: Icon(Icons.refresh),
+              label: Text('Select another file'),
+            ),
           ],
         ),
       ),
