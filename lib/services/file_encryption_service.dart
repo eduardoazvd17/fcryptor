@@ -29,6 +29,11 @@ class FileEncryptionService {
     try {
       final normalizedKey = _normalizeKey(key, paddingChar);
       final fileBytes = await file.readAsBytes();
+
+      if (fileBytes.isEmpty) {
+        return Error('File is empty');
+      }
+
       final aesKey = Key.fromUtf8(normalizedKey);
       final iv = IV.fromLength(16);
       final encrypter = Encrypter(AES(aesKey, mode: AESMode.cbc));
@@ -84,6 +89,8 @@ class FileEncryptionService {
         },
         onError: (error) => Error(error),
       );
+    } on ArgumentError {
+      return Error('Incorrect password or corrupted file');
     } catch (_) {
       return Error('Error decrypting file');
     }
