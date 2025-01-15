@@ -4,11 +4,12 @@ import 'package:encrypt/encrypt.dart';
 import 'package:fcryptor/services/file_picker_service.dart';
 import 'package:fcryptor/utils/constants.dart';
 import 'package:fcryptor/utils/file_extension.dart';
+import 'package:fcryptor/utils/result.dart';
 
 class FileEncryptionService {
   FileEncryptionService._();
 
-  static Future<File?> start(
+  static Future<Result<File, String>> start(
     File file,
     String key, {
     String paddingChar = kDefaultPaddingChar,
@@ -20,7 +21,7 @@ class FileEncryptionService {
     }
   }
 
-  static Future<File?> _encrypt(
+  static Future<Result<File, String>> _encrypt(
     File file,
     String key, {
     String paddingChar = kDefaultPaddingChar,
@@ -33,19 +34,27 @@ class FileEncryptionService {
       final encrypter = Encrypter(AES(aesKey, mode: AESMode.cbc));
       final encrypted = encrypter.encryptBytes(fileBytes, iv: iv);
 
-      final encryptedFilePath = await FilePickerService.saveFile(
+      final saveResult = await FilePickerService.saveFile(
         fileName: file.name + kEncryptedFileExtension,
         bytes: Uint8List.fromList(iv.bytes + encrypted.bytes),
         initialDirectory: file.parent.path,
       );
-      return await File(encryptedFilePath!)
-          .writeAsBytes(iv.bytes + encrypted.bytes);
+
+      return saveResult.fold(
+        onSuccess: (success) async {
+          final result = await File(success).writeAsBytes(
+            iv.bytes + encrypted.bytes,
+          );
+          return Success(result);
+        },
+        onError: (error) => Error(error),
+      );
     } catch (_) {
-      return null;
+      return Error('Error encrypting file');
     }
   }
 
-  static Future<File?> _decrypt(
+  static Future<Result<File, String>> _decrypt(
     File file,
     String key, {
     String paddingChar = kDefaultPaddingChar,
@@ -62,14 +71,21 @@ class FileEncryptionService {
         iv: iv,
       );
 
-      final originalFilePath = await FilePickerService.saveFile(
+      final saveResult = await FilePickerService.saveFile(
         fileName: file.name.replaceAll(kEncryptedFileExtension, ''),
         bytes: Uint8List.fromList(decrypted),
         initialDirectory: file.parent.path,
       );
-      return File(originalFilePath!).writeAsBytes(decrypted);
+
+      return saveResult.fold(
+        onSuccess: (success) async {
+          final result = await File(success).writeAsBytes(decrypted);
+          return Success(result);
+        },
+        onError: (error) => Error(error),
+      );
     } catch (_) {
-      return null;
+      return Error('Error decrypting file');
     }
   }
 

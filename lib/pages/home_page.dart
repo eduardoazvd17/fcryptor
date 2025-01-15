@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
     setState(() => _isLoading = true);
     final file = await FilePickerService.pickFile();
     setState(() {
-      if (file != null) _file = file;
+      if (file.value != null) _file = file.value;
       _isLoading = false;
     });
   }
@@ -62,13 +62,21 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _tryAgain() {
+    setState(() {
+      _errorMessage = null;
+      _resultFile = null;
+    });
+  }
+
   Future<void> _start() async {
     setState(() => _isLoading = true);
     final result = await FileEncryptionService.start(_file!, _password!);
-    setState(() {
-      _resultFile = result;
-      _isLoading = false;
-    });
+    result.fold(
+      onSuccess: (success) => setState(() => _resultFile = success),
+      onError: (error) => setState(() => _errorMessage = error),
+    );
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -281,15 +289,32 @@ class _HomePageState extends State<HomePage> {
               _resultFile != null
                   ? 'Successfully ${_isDecrypting ? 'decrypted' : 'encrypted'} file.'
                   : 'An error occurred on ${_isDecrypting ? 'decrypting' : 'encrypting'} file process, please try again.',
+              textAlign: TextAlign.center,
             ),
             if (_errorMessage != null) ...[
               const SizedBox(height: 10),
-              Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.red,
-                    ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.red,
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
             if (_resultFile != null) ...[
@@ -331,9 +356,13 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Expanded(
                   child: TextButton.icon(
-                    onPressed: _reset,
+                    onPressed: _errorMessage == null ? _reset : _tryAgain,
                     icon: Icon(Icons.refresh),
-                    label: Text('Select another file'),
+                    label: Text(
+                      _errorMessage != null
+                          ? 'Try again'
+                          : 'Select another file',
+                    ),
                   ),
                 ),
               ],
