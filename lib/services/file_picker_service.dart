@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:universal_html/html.dart' as html;
 
 class FilePickerService {
   FilePickerService._();
@@ -25,9 +25,13 @@ class FilePickerService {
   }) async {
     try {
       if (kIsWeb) {
-        //TODO: saveFile don't work for web.
-        //TODO: Need to create download feature for web.
-        return null;
+        final blob = html.Blob([bytes]);
+        final url = html.Url.createObjectUrl(blob);
+        html.AnchorElement(href: url)
+          ..setAttribute('download', fileName)
+          ..click();
+        html.Url.revokeObjectUrl(url);
+        return '${html.window.navigator.userAgent}/Downloads/$fileName';
       } else {
         return await FilePicker.platform.saveFile(
           fileName: fileName,

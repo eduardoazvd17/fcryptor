@@ -114,6 +114,7 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(16),
         child: ContentContainerWidget(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               RoundedIconWidget(
                 icon: Icons.upload_file_outlined,
@@ -186,12 +187,15 @@ class _HomePageState extends State<HomePage> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    labelText: ' Encryption password ',
+                    labelText:
+                        ' ${_isDecrypting ? 'Decryption' : 'Encryption'} password ',
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     floatingLabelAlignment: FloatingLabelAlignment.center,
+                    helperText: 'Minimum 6 characters',
+                    helperStyle: TextStyle(color: Colors.grey[600]),
                   ),
                   onChanged: (value) => setState(() {
-                    _password = value.isEmpty ? null : value;
+                    _password = value.length < 6 ? null : value;
                   }),
                 ),
                 const SizedBox(height: 10),
