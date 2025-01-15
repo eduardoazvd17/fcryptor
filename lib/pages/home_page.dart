@@ -1,8 +1,6 @@
-import 'dart:io';
-
+import 'package:fcryptor/models/file_model.dart';
 import 'package:fcryptor/services/file_encryption_service.dart';
 import 'package:fcryptor/utils/constants.dart';
-import 'package:fcryptor/utils/file_extension.dart';
 import 'package:fcryptor/widgets/footer_widget.dart';
 import 'package:fcryptor/widgets/header_widget.dart';
 import 'package:fcryptor/widgets/rounded_icon_widget.dart';
@@ -21,10 +19,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late final TextEditingController _passwordController;
 
-  File? _file;
+  FileModel? _file;
   String? _password;
   bool _isLoading = false;
-  File? _resultFile;
+  FileModel? _resultFile;
   String? _errorMessage;
 
   bool get _isDecrypting =>
@@ -367,7 +365,12 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Expanded(
                   child: TextButton.icon(
-                    onPressed: _errorMessage == null ? _reset : _tryAgain,
+                    onPressed: _errorMessage == null
+                        ? () {
+                            _reset();
+                            _selectFile();
+                          }
+                        : _tryAgain,
                     icon: Icon(Icons.refresh),
                     label: Text(
                       _errorMessage != null

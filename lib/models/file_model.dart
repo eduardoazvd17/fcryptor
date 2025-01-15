@@ -1,8 +1,12 @@
-import 'dart:io';
+import 'dart:typed_data';
 
-extension FileExtension on File {
-  String get name =>
-      path.replaceAll(parent.path, '').replaceAll('/', '').replaceAll('\\', '');
+class FileModel {
+  final String name;
+  final String path;
+  final Uint8List bytes;
+
+  String get directory =>
+      path.split('/').take(path.split('/').length - 1).join('/');
 
   String get shortName {
     final splittedName = this.name.split('.');
@@ -14,4 +18,10 @@ extension FileExtension on File {
     }
     return this.name;
   }
+
+  FileModel({
+    required this.name,
+    required this.path,
+    required this.bytes,
+  });
 }
