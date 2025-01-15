@@ -5,15 +5,13 @@ import 'package:fcryptor/services/file_picker_service.dart';
 import 'package:fcryptor/utils/constants.dart';
 import 'package:fcryptor/utils/file_extension.dart';
 
-const _kDefaultPaddingChar = 'x';
-
 class FileEncryptionService {
   FileEncryptionService._();
 
   static Future<File?> start(
     File file,
     String key, {
-    String paddingChar = _kDefaultPaddingChar,
+    String paddingChar = kDefaultPaddingChar,
   }) async {
     if (file.path.endsWith(kEncryptedFileExtension)) {
       return await _decrypt(file, key, paddingChar: paddingChar);
@@ -25,7 +23,7 @@ class FileEncryptionService {
   static Future<File?> _encrypt(
     File file,
     String key, {
-    String paddingChar = _kDefaultPaddingChar,
+    String paddingChar = kDefaultPaddingChar,
   }) async {
     try {
       final normalizedKey = _normalizeKey(key, paddingChar);
@@ -49,7 +47,7 @@ class FileEncryptionService {
   static Future<File?> _decrypt(
     File file,
     String key, {
-    String paddingChar = _kDefaultPaddingChar,
+    String paddingChar = kDefaultPaddingChar,
   }) async {
     try {
       final normalizedKey = _normalizeKey(key, paddingChar);

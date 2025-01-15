@@ -34,13 +34,12 @@ class MyApp extends StatelessWidget {
       title: 'FCryptor',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.orange,
+          seedColor: Colors.blue,
           brightness: Brightness.dark,
-          primary: Colors.orange,
-          background: Colors.grey.shade900,
+          primary: Colors.blue,
         ),
         scaffoldBackgroundColor: Colors.grey.shade900,
-        primaryColor: Colors.orange,
+        primaryColor: Colors.blue,
         useMaterial3: true,
       ),
       home: const HomePage(),
