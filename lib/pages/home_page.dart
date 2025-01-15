@@ -81,41 +81,47 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-              Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.1),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                Theme.of(context)
+                    .scaffoldBackgroundColor
+                    .withValues(alpha: 0.1),
+              ],
+            ),
+          ),
+          child: Column(
+            children: [
+              const HeaderWidget(),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AnimatedSwitcher(
+                      switchInCurve: Curves.ease,
+                      switchOutCurve: Curves.ease,
+                      duration: const Duration(seconds: 1),
+                      reverseDuration: const Duration(seconds: 1),
+                      child: _file == null
+                          ? _buildFileSelectorStep()
+                          : (_resultFile == null && _errorMessage == null)
+                              ? _buildPasswordStep()
+                              : _buildResultStep(),
+                    ),
+                  ],
+                ),
+              ),
+              FooterWidget(isLoading: _isLoading),
             ],
           ),
-        ),
-        child: Column(
-          children: [
-            const HeaderWidget(),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AnimatedSwitcher(
-                    switchInCurve: Curves.ease,
-                    switchOutCurve: Curves.ease,
-                    duration: const Duration(seconds: 1),
-                    reverseDuration: const Duration(seconds: 1),
-                    child: _file == null
-                        ? _buildFileSelectorStep()
-                        : (_resultFile == null && _errorMessage == null)
-                            ? _buildPasswordStep()
-                            : _buildResultStep(),
-                  ),
-                ],
-              ),
-            ),
-            FooterWidget(isLoading: _isLoading),
-          ],
         ),
       ),
     );
