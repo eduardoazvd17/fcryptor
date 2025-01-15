@@ -98,23 +98,35 @@ class _HomePageState extends State<HomePage> {
           ),
           child: Column(
             children: [
-              const HeaderWidget(),
               Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AnimatedSwitcher(
-                      switchInCurve: Curves.ease,
-                      switchOutCurve: Curves.ease,
-                      duration: const Duration(seconds: 1),
-                      reverseDuration: const Duration(seconds: 1),
-                      child: _file == null
-                          ? _buildFileSelectorStep()
-                          : (_resultFile == null && _errorMessage == null)
-                              ? _buildPasswordStep()
-                              : _buildResultStep(),
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        const HeaderWidget(),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: 550),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              AnimatedSwitcher(
+                                switchInCurve: Curves.ease,
+                                switchOutCurve: Curves.ease,
+                                duration: const Duration(seconds: 1),
+                                reverseDuration: const Duration(seconds: 1),
+                                child: _file == null
+                                    ? _buildFileSelectorStep()
+                                    : (_resultFile == null &&
+                                            _errorMessage == null)
+                                        ? _buildPasswordStep()
+                                        : _buildResultStep(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
               FooterWidget(isLoading: _isLoading),
