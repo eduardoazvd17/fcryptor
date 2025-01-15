@@ -14,7 +14,7 @@ void main() async {
 
 Future<void> _setDesktopAppSettings() async {
   if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS) {
-    const size = Size(400, 640);
+    const size = Size(400, 700);
     await windowManager.ensureInitialized();
     WindowManager.instance.setTitle('FCryptor');
     WindowManager.instance.setSize(size);
