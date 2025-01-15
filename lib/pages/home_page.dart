@@ -180,7 +180,12 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 20),
                 InkWell(
-                  onTap: _isLoading ? null : _reset,
+                  onTap: _isLoading
+                      ? null
+                      : () {
+                          _reset();
+                          _selectFile();
+                        },
                   child: Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context)
