@@ -34,27 +34,19 @@ class FileEncryptionService {
         return Error('File is empty');
       }
 
-      // Gerar salt aleatório
       final salt = _generateRandomBytes(8);
-
-      // Derivar chave e IV usando PBKDF2
       final (key, iv) = _deriveKeyAndIV(normalizedKey, salt);
-
-      // Configurar cipher
       final cipher = CBCBlockCipher(AESEngine())
         ..init(
           true,
           ParametersWithIV(
-              KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv)),
+            KeyParameter(Uint8List.fromList(key)),
+            Uint8List.fromList(iv),
+          ),
         );
 
-      // Aplicar padding PKCS7
       final paddedData = _addPKCS7Padding(file.bytes);
-
-      // Criptografar
       final encrypted = _processBlocks(cipher, paddedData);
-
-      // Formato OpenSSL: "Salted__" + salt + encrypted
       final output = Uint8List(8 + salt.length + encrypted.length);
       output.setAll(0, utf8.encode('Salted__'));
       output.setAll(8, salt);
@@ -75,7 +67,6 @@ class FileEncryptionService {
         return Error('File is empty');
       }
 
-      // Verificar formato OpenSSL
       if (file.bytes.length < 16 ||
           String.fromCharCodes(file.bytes.sublist(0, 8)) != 'Salted__') {
         return Error('Invalid file format');
@@ -83,22 +74,17 @@ class FileEncryptionService {
 
       final salt = file.bytes.sublist(8, 16);
       final encrypted = file.bytes.sublist(16);
-
-      // Derivar chave e IV
       final (key, iv) = _deriveKeyAndIV(normalizedKey, salt);
-
-      // Configurar cipher para decriptação
       final cipher = CBCBlockCipher(AESEngine())
         ..init(
           false,
           ParametersWithIV(
-              KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv)),
+            KeyParameter(Uint8List.fromList(key)),
+            Uint8List.fromList(iv),
+          ),
         );
 
-      // Decriptografar
       final decrypted = _processBlocks(cipher, encrypted);
-
-      // Remover padding
       final unpadded = _removePKCS7Padding(decrypted);
 
       return await _saveAndReturnNewFile(file, Uint8List.fromList(unpadded));
@@ -110,21 +96,16 @@ class FileEncryptionService {
   }
 
   static (List<int>, List<int>) _deriveKeyAndIV(
-      String password, List<int> salt) {
-    final generator = PBKDF2KeyDerivator(HMac(SHA256Digest(), 64))
-      ..init(Pbkdf2Parameters(
-        Uint8List.fromList(salt),
-        10000, // Iterações padrão do OpenSSL para PBKDF2
-        48, // 32 bytes para chave + 16 bytes para IV
-      ));
-
-    final keyIvBytes =
-        generator.process(Uint8List.fromList(utf8.encode(password)));
-
-    return (
-      keyIvBytes.sublist(0, 32), // Chave AES-256
-      keyIvBytes.sublist(32, 48), // IV
+    String password,
+    List<int> salt,
+  ) {
+    final generator = PBKDF2KeyDerivator(HMac(SHA256Digest(), 64));
+    generator.init(Pbkdf2Parameters(Uint8List.fromList(salt), 10000, 48));
+    final keyIvBytes = generator.process(
+      Uint8List.fromList(utf8.encode(password)),
     );
+
+    return (keyIvBytes.sublist(0, 32), keyIvBytes.sublist(32, 48));
   }
 
   static List<int> _processBlocks(BlockCipher cipher, List<int> input) {
