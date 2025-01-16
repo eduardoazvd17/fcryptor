@@ -1,10 +1,12 @@
+import 'dart:convert';
 import 'dart:io';
-import 'package:encrypt/encrypt.dart';
+import 'dart:math';
 import 'package:fcryptor/models/file_model.dart';
 import 'package:fcryptor/services/file_picker_service.dart';
 import 'package:fcryptor/utils/constants.dart';
 import 'package:fcryptor/utils/result.dart';
 import 'package:flutter/foundation.dart' hide Key;
+import 'package:pointycastle/export.dart';
 
 class FileEncryptionService {
   FileEncryptionService._();
@@ -14,66 +16,146 @@ class FileEncryptionService {
     String key, {
     String paddingChar = kDefaultPaddingChar,
   }) async {
-    final encrypter = Encrypter(
-      AES(Key.fromUtf8(_normalizeKey(key, paddingChar)), mode: AESMode.cbc),
-    );
+    final normalizedKey = _normalizeKey(key, paddingChar);
 
     if (file.name.endsWith(kEncryptedFileExtension)) {
-      return await _decrypt(encrypter, file, key, paddingChar: paddingChar);
+      return await _decrypt(file, normalizedKey);
     } else {
-      return await _encrypt(encrypter, file, key, paddingChar: paddingChar);
+      return await _encrypt(file, normalizedKey);
     }
   }
 
   static Future<Result<FileModel, String>> _encrypt(
-    Encrypter encrypter,
     FileModel file,
-    String key, {
-    String paddingChar = kDefaultPaddingChar,
-  }) async {
+    String normalizedKey,
+  ) async {
     try {
       if (file.bytes.isEmpty) {
         return Error('File is empty');
       }
 
-      final iv = IV.fromLength(16);
-      final encryptedFile = encrypter.encryptBytes(file.bytes, iv: iv);
+      // Gerar salt aleatório
+      final salt = _generateRandomBytes(8);
 
-      return await _saveAndReturnNewFile(
-        file,
-        Uint8List.fromList(iv.bytes + encryptedFile.bytes),
-      );
-    } catch (_) {
-      return Error('Error encrypting file');
+      // Derivar chave e IV usando PBKDF2
+      final (key, iv) = _deriveKeyAndIV(normalizedKey, salt);
+
+      // Configurar cipher
+      final cipher = CBCBlockCipher(AESEngine())
+        ..init(
+          true,
+          ParametersWithIV(
+              KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv)),
+        );
+
+      // Aplicar padding PKCS7
+      final paddedData = _addPKCS7Padding(file.bytes);
+
+      // Criptografar
+      final encrypted = _processBlocks(cipher, paddedData);
+
+      // Formato OpenSSL: "Salted__" + salt + encrypted
+      final output = Uint8List(8 + salt.length + encrypted.length);
+      output.setAll(0, utf8.encode('Salted__'));
+      output.setAll(8, salt);
+      output.setAll(16, encrypted);
+
+      return await _saveAndReturnNewFile(file, output);
+    } catch (e) {
+      return Error('Error encrypting file: $e');
     }
   }
 
   static Future<Result<FileModel, String>> _decrypt(
-    Encrypter encrypter,
     FileModel file,
-    String key, {
-    String paddingChar = kDefaultPaddingChar,
-  }) async {
+    String normalizedKey,
+  ) async {
     try {
       if (file.bytes.isEmpty) {
         return Error('File is empty');
       }
 
-      final iv = IV(file.bytes.sublist(0, 16));
-      final decryptedFileBytes = encrypter.decryptBytes(
-        Encrypted(file.bytes.sublist(16)),
-        iv: iv,
-      );
+      // Verificar formato OpenSSL
+      if (file.bytes.length < 16 ||
+          String.fromCharCodes(file.bytes.sublist(0, 8)) != 'Salted__') {
+        return Error('Invalid file format');
+      }
 
-      return await _saveAndReturnNewFile(
-        file,
-        Uint8List.fromList(decryptedFileBytes),
-      );
-    } on ArgumentError {
-      return Error('Incorrect password or corrupted file');
-    } catch (_) {
+      final salt = file.bytes.sublist(8, 16);
+      final encrypted = file.bytes.sublist(16);
+
+      // Derivar chave e IV
+      final (key, iv) = _deriveKeyAndIV(normalizedKey, salt);
+
+      // Configurar cipher para decriptação
+      final cipher = CBCBlockCipher(AESEngine())
+        ..init(
+          false,
+          ParametersWithIV(
+              KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv)),
+        );
+
+      // Decriptografar
+      final decrypted = _processBlocks(cipher, encrypted);
+
+      // Remover padding
+      final unpadded = _removePKCS7Padding(decrypted);
+
+      return await _saveAndReturnNewFile(file, Uint8List.fromList(unpadded));
+    } on FormatException catch (_) {
+      return Error('Incorrect password or file corrupted');
+    } catch (e) {
       return Error('Error decrypting file');
     }
+  }
+
+  static (List<int>, List<int>) _deriveKeyAndIV(
+      String password, List<int> salt) {
+    final generator = PBKDF2KeyDerivator(HMac(SHA256Digest(), 64))
+      ..init(Pbkdf2Parameters(
+        Uint8List.fromList(salt),
+        10000, // Iterações padrão do OpenSSL para PBKDF2
+        48, // 32 bytes para chave + 16 bytes para IV
+      ));
+
+    final keyIvBytes =
+        generator.process(Uint8List.fromList(utf8.encode(password)));
+
+    return (
+      keyIvBytes.sublist(0, 32), // Chave AES-256
+      keyIvBytes.sublist(32, 48), // IV
+    );
+  }
+
+  static List<int> _processBlocks(BlockCipher cipher, List<int> input) {
+    final output = Uint8List(input.length);
+    for (var offset = 0; offset < input.length; offset += 16) {
+      cipher.processBlock(
+        Uint8List.fromList(input.sublist(offset, offset + 16)),
+        0,
+        output,
+        offset,
+      );
+    }
+    return output;
+  }
+
+  static List<int> _addPKCS7Padding(List<int> data) {
+    final padLength = 16 - (data.length % 16);
+    return [...data, ...List.filled(padLength, padLength)];
+  }
+
+  static List<int> _removePKCS7Padding(List<int> data) {
+    final padLength = data.last;
+    if (padLength < 1 || padLength > 16) {
+      throw FormatException('Invalid padding');
+    }
+    return data.sublist(0, data.length - padLength);
+  }
+
+  static List<int> _generateRandomBytes(int length) {
+    final random = Random.secure();
+    return List.generate(length, (_) => random.nextInt(256));
   }
 
   static String _normalizeKey(String key, String paddingChar) {
