@@ -54,7 +54,7 @@ class FileEncryptionService {
 
       return await _saveAndReturnNewFile(file, output);
     } catch (e) {
-      return Error('Error encrypting file: $e');
+      return Error('Error encrypting file');
     }
   }
 
