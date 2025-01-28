@@ -1,6 +1,11 @@
 # FCryptor
 
-FCryptor is a cross-platform file encryption application built with Flutter. It provides a secure way to encrypt and decrypt files across different platforms, including web and desktop environments.
+<div style="display: flex; align-items: center;">
+  <img src="assets/images/desktop_icon.png" width="80">
+  <div style="margin-left: 10px">
+    FCryptor is a cross-platform file encryption application built with Flutter. It provides a secure way to encrypt and decrypt files across different platforms, including web and desktop environments.
+  </div>
+</div>
 
 ## Features
 
