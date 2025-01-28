@@ -105,25 +105,25 @@ flutter_launcher_icons:
   adaptive_icon_background_dark: "#000000"
   web:
     generate: true
-    image_path: "assets/images/icon.png"
+    image_path: "assets/images/desktop_icon.png"
   windows:
     generate: true
-    image_path: "assets/images/icon.png"
+    image_path: "assets/images/desktop_icon.png"
     icon_size: 256
   macos:
     generate: true
-    image_path: "assets/images/icon.png"
+    image_path: "assets/images/desktop_icon.png"
 
 flutter_native_splash:
   android: true
   ios: true
   web: true
-  image: "assets/images/icon.png"
-  image_dark: "assets/images/icon.png"
+  image: "assets/images/desktop_icon.png"
+  image_dark: "assets/images/desktop_icon.png"
   color: "#ffffff"
   color_dark: "#000000"
   android_12:
-    image: "assets/images/icon.png"
-    image_dark: "assets/images/icon.png"
+    image: "assets/images/desktop_icon.png"
+    image_dark: "assets/images/desktop_icon.png"
     icon_background_color: "#ffffff"
     icon_background_color_dark: "#000000"
