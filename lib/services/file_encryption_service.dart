@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math';
 import 'package:fcryptor/models/file_model.dart';
 import 'package:fcryptor/services/file_picker_service.dart';
@@ -16,13 +17,14 @@ class FileEncryptionService {
     String key, {
     String paddingChar = kDefaultPaddingChar,
   }) async {
-    final normalizedKey = _normalizeKey(key, paddingChar);
-
-    if (file.name.endsWith(kEncryptedFileExtension)) {
-      return await _decrypt(file, normalizedKey);
-    } else {
-      return await _encrypt(file, normalizedKey);
-    }
+    return await Isolate.run(() async {
+      final normalizedKey = _normalizeKey(key, paddingChar);
+      if (file.name.endsWith(kEncryptedFileExtension)) {
+        return await _decrypt(file, normalizedKey);
+      } else {
+        return await _encrypt(file, normalizedKey);
+      }
+    });
   }
 
   static Future<Result<FileModel, String>> _encrypt(
