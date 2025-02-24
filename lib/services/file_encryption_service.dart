@@ -17,15 +17,16 @@ class FileEncryptionService {
     String key, {
     String paddingChar = kDefaultPaddingChar,
   }) async {
-    final result = await Isolate.run(() async {
+    Future<Result<(FileModel, Uint8List), String>> start() async {
       final normalizedKey = _normalizeKey(key, paddingChar);
       if (file.name.endsWith(kEncryptedFileExtension)) {
         return await _decrypt(file, normalizedKey);
       } else {
         return await _encrypt(file, normalizedKey);
       }
-    });
+    }
 
+    final result = kIsWeb ? await start() : await Isolate.run(start);
     return result.fold(
       onSuccess: (s) async => await _saveAndReturnNewFile(s.$1, s.$2),
       onError: (e) => Error(e),
