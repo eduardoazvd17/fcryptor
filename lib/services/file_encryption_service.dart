@@ -17,7 +17,7 @@ class FileEncryptionService {
     String key, {
     String paddingChar = kDefaultPaddingChar,
   }) async {
-    return await Isolate.run(() async {
+    final result = await Isolate.run(() async {
       final normalizedKey = _normalizeKey(key, paddingChar);
       if (file.name.endsWith(kEncryptedFileExtension)) {
         return await _decrypt(file, normalizedKey);
@@ -25,9 +25,14 @@ class FileEncryptionService {
         return await _encrypt(file, normalizedKey);
       }
     });
+
+    return result.fold(
+      onSuccess: (s) async => await _saveAndReturnNewFile(s.$1, s.$2),
+      onError: (e) => Error(e),
+    );
   }
 
-  static Future<Result<FileModel, String>> _encrypt(
+  static Future<Result<(FileModel, Uint8List), String>> _encrypt(
     FileModel file,
     String normalizedKey,
   ) async {
@@ -54,13 +59,13 @@ class FileEncryptionService {
       output.setAll(8, salt);
       output.setAll(16, encrypted);
 
-      return await _saveAndReturnNewFile(file, output);
+      return Success((file, output));
     } catch (e) {
       return Error('Error encrypting file');
     }
   }
 
-  static Future<Result<FileModel, String>> _decrypt(
+  static Future<Result<(FileModel, Uint8List), String>> _decrypt(
     FileModel file,
     String normalizedKey,
   ) async {
@@ -89,7 +94,7 @@ class FileEncryptionService {
       final decrypted = _processBlocks(cipher, encrypted);
       final unpadded = _removePKCS7Padding(decrypted);
 
-      return await _saveAndReturnNewFile(file, Uint8List.fromList(unpadded));
+      return Success((file, Uint8List.fromList(unpadded)));
     } on FormatException catch (_) {
       return Error('Incorrect password or file corrupted');
     } catch (e) {
