@@ -251,6 +251,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 25),
                 TextField(
+                  enabled: !_isLoading,
                   controller: _passwordController,
                   maxLength: 32,
                   textAlign: TextAlign.center,
