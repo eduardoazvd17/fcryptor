@@ -70,9 +70,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
     if (_bannerAd == null) {
       return const SizedBox();
     } else {
-      return Container(
+      return SizedBox(
         width: MediaQuery.of(context).size.width,
-        color: Theme.of(context).colorScheme.surface,
         child: Column(
           children: [
             Stack(
