@@ -1,6 +1,7 @@
 import 'package:fcryptor/models/file_model.dart';
 import 'package:fcryptor/services/file_encryption_service.dart';
 import 'package:fcryptor/utils/constants.dart';
+import 'package:fcryptor/widgets/banner_ad_widget.dart';
 import 'package:fcryptor/widgets/footer_widget.dart';
 import 'package:fcryptor/widgets/header_widget.dart';
 import 'package:fcryptor/widgets/rounded_icon_widget.dart';
@@ -130,6 +131,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               FooterWidget(isLoading: _isLoading),
+              const BannerAdWidget(),
             ],
           ),
         ),
