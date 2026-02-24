@@ -9,7 +9,9 @@ import 'pages/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await MobileAds.instance.initialize();
+  if (!kIsWeb && Platform.isAndroid || Platform.isIOS) {
+    await MobileAds.instance.initialize();
+  }
   await _setDesktopAppSettings();
   runApp(const MyApp());
 }

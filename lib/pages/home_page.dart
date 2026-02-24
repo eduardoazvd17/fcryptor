@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fcryptor/models/file_model.dart';
 import 'package:fcryptor/services/file_encryption_service.dart';
 import 'package:fcryptor/utils/constants.dart';
@@ -5,6 +7,7 @@ import 'package:fcryptor/widgets/banner_ad_widget.dart';
 import 'package:fcryptor/widgets/footer_widget.dart';
 import 'package:fcryptor/widgets/header_widget.dart';
 import 'package:fcryptor/widgets/rounded_icon_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../services/file_picker_service.dart';
@@ -131,7 +134,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               FooterWidget(isLoading: _isLoading),
-              const BannerAdWidget(),
+              if (!kIsWeb && Platform.isAndroid || Platform.isIOS)
+                const BannerAdWidget(),
             ],
           ),
         ),
